@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Gym | AI Mental Wellness</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Configurations and Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'fade-in-up': 'fadeInUp 0.5s ease-out',
+                        'fade-in-down': 'fadeInDown 0.3s ease-out',
+                        'blob': 'blob 7s infinite',
+                        'bounce': 'bounce 1s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .animation-delay-200 { animation-delay: 200ms; }
+        .animation-delay-400 { animation-delay: 400ms; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Utility classes for toggling */
+        .nav-active { border-color: #0d9488 !important; color: #0d9488 !important; }
+        .nav-inactive { border-color: transparent !important; color: #64748b !important; }
+        .mobile-nav-active { background-color: #f0fdfa !important; color: #0f766e !important; }
+        .mobile-nav-inactive { color: #334155 !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col selection:bg-teal-200 selection:text-teal-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-2 cursor-pointer group" onclick="navigateTo('home')">
+                    <div class="bg-teal-600 p-2 rounded-lg group-hover:bg-teal-700 transition-colors">
+                        <i data-lucide="brain" class="h-6 w-6 text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold text-slate-800 tracking-tight">Mind Gym</span>
+                </div>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex space-x-8" id="desktop-nav">
+                    <button data-target="home" onclick="navigateTo('home')" class="nav-btn nav-active font-medium transition-colors border-b-2 px-1 py-5 hover:text-slate-900 hover:border-slate-300">Home</button>
+                    <button data-target="therapy" onclick="navigateTo('therapy')" class="nav-btn nav-inactive font-medium transition-colors border-b-2 px-1 py-5 hover:text-slate-900 hover:border-slate-300">AI Therapy</button>
+                    <button data-target="journal" onclick="navigateTo('journal')" class="nav-btn nav-inactive font-medium transition-colors border-b-2 px-1 py-5 hover:text-slate-900 hover:border-slate-300">Journal</button>
+                    <button data-target="spiritual" onclick="navigateTo('spiritual')" class="nav-btn nav-inactive font-medium transition-colors border-b-2 px-1 py-5 hover:text-slate-900 hover:border-slate-300">Mindfulness</button>
+                </div>
+
+                <div class="hidden md:flex">
+                    <button onclick="navigateTo('therapy')" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 rounded-full font-medium transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        Start Session
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-teal-600 focus:outline-none">
+                        <i data-lucide="menu" id="icon-menu" class="h-6 w-6"></i>
+                        <i data-lucide="x" id="icon-close" class="h-6 w-6 hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Nav -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 shadow-lg animate-fade-in-down absolute w-full">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button data-target="home" onclick="navigateTo('home')" class="mobile-nav-btn mobile-nav-active block w-full text-left px-3 py-4 rounded-md text-base font-medium hover:bg-slate-50 hover:text-slate-900">Home</button>
+                <button data-target="therapy" onclick="navigateTo('therapy')" class="mobile-nav-btn mobile-nav-inactive block w-full text-left px-3 py-4 rounded-md text-base font-medium hover:bg-slate-50 hover:text-slate-900">AI Therapy</button>
+                <button data-target="journal" onclick="navigateTo('journal')" class="mobile-nav-btn mobile-nav-inactive block w-full text-left px-3 py-4 rounded-md text-base font-medium hover:bg-slate-50 hover:text-slate-900">Journal</button>
+                <button data-target="spiritual" onclick="navigateTo('spiritual')" class="mobile-nav-btn mobile-nav-inactive block w-full text-left px-3 py-4 rounded-md text-base font-medium hover:bg-slate-50 hover:text-slate-900">Mindfulness</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col relative overflow-hidden">
+        <!-- Background decorative elements -->
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob pointer-events-none"></div>
+        <div class="absolute top-[20%] right-[-10%] w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 pointer-events-none"></div>
+
+        <div class="relative z-10 flex-grow w-full" id="views-container">
+            
+            <!-- 1. Home View -->
+            <div id="view-home" class="view-section flex flex-col animate-fade-in">
+                <!-- Hero Section -->
+                <section class="pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full text-center">
+                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-teal-50 text-teal-700 font-medium text-sm mb-8 border border-teal-100 shadow-sm">
+                        <i data-lucide="sparkles" class="w-4 h-4 mr-2"></i>
+                        Evidence-based CBT & Mindfulness
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+                        Train your mind.<br class="hidden sm:block" /> 
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-600">
+                            Find your peace.
+                        </span>
+                    </h1>
+                    <p class="mt-4 text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+                        Mind Gym is an AI-driven wellness platform offering personalized therapy prompts, secure journaling, and optional spiritual guidance for stressed minds.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        <button onclick="navigateTo('therapy')" class="w-full sm:w-auto px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center">
+                            Start Your Journey <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+                        </button>
+                        <button onclick="navigateTo('journal')" class="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-full font-bold text-lg transition-all shadow-sm flex items-center justify-center">
+                            <i data-lucide="book-open" class="ml-2 w-5 h-5 mr-2"></i> Open Journal
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Target Audience Highlight -->
+                <section class="py-12 bg-white/50 border-y border-slate-200">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                        <p class="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-8">Designed specifically for</p>
+                        <div class="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
+                            <div class="flex items-center space-x-2"><i data-lucide="activity" class="w-6 h-6"></i> <span class="font-bold text-lg">Stressed Professionals</span></div>
+                            <div class="flex items-center space-x-2"><i data-lucide="book-open" class="w-6 h-6"></i> <span class="font-bold text-lg">Overwhelmed Students</span></div>
+                            <div class="flex items-center space-x-2"><i data-lucide="heart" class="w-6 h-6"></i> <span class="font-bold text-lg">Underserved Communities</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Infographic Section: How it Works -->
+                <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-slate-900 mb-4">The Mind Gym Process</h2>
+                        <p class="text-slate-600 max-w-2xl mx-auto">Our interactive framework combines Cognitive Behavioral Therapy (CBT) techniques with accessible AI technology to help you reframe negative thoughts.</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-teal-200 via-blue-200 to-purple-200 transform -translate-y-1/2 z-0"></div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                            <!-- Step 1 -->
+                            <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-100 hover:shadow-xl transition-shadow group relative">
+                                <div class="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <i data-lucide="message-circle" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-center mb-3">1. Express</h3>
+                                <p class="text-slate-500 text-center text-sm">Tell our AI how you're feeling. Safe, secure, and judgment-free identification of stressors.</p>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-100 hover:shadow-xl transition-shadow group relative">
+                                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <i data-lucide="brain" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-center mb-3">2. Process</h3>
+                                <p class="text-slate-500 text-center text-sm">Receive personalized CBT prompts to challenge cognitive distortions and reframe your thoughts.</p>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-100 hover:shadow-xl transition-shadow group relative">
+                                <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-center mb-3">3. Grow</h3>
+                                <p class="text-slate-500 text-center text-sm">Log your progress in the journal or utilize mindfulness exercises to build long-term resilience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 2. Therapy View -->
+            <div id="view-therapy" class="view-section hidden max-w-4xl mx-auto px-4 py-12 animate-fade-in w-full">
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                    
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-teal-500 to-teal-700 p-8 text-white text-center">
+                        <i data-lucide="brain" class="w-12 h-12 mx-auto mb-4 opacity-90"></i>
+                        <h2 class="text-3xl font-bold mb-2">AI Therapy Assistant</h2>
+                        <p class="text-teal-100">Evidence-based CBT prompts to help you reframe your thoughts.</p>
+                    </div>
+
+                    <div class="p-8">
+                        <!-- Step 1: Mood Selection -->
+                        <h3 class="text-lg font-semibold text-slate-700 mb-4 text-center">How are you feeling right now?</h3>
+                        <div class="flex flex-wrap justify-center gap-3 mb-8" id="mood-buttons-container">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <div class="flex items-center space-x-4 mb-8">
+                            <hr class="flex-grow border-slate-200" />
+                            <span class="text-slate-400 text-sm font-medium uppercase">OR BE SPECIFIC</span>
+                            <hr class="flex-grow border-slate-200" />
+                        </div>
+
+                        <form id="custom-mood-form" class="relative mb-12">
+                            <input 
+                                type="text" 
+                                id="custom-mood-input"
+                                placeholder="E.g., 'I failed my presentation and I feel useless...'" 
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-5 py-4 pr-16 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            />
+                            <button 
+                                type="submit"
+                                id="custom-mood-submit"
+                                disabled
+                                class="absolute right-2 top-2 bottom-2 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 text-white p-2 rounded-lg transition-colors flex items-center justify-center w-12"
+                            >
+                                <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+
+                        <!-- AI Response Area -->
+                        <div id="ai-response-container" class="transition-all duration-500 rounded-2xl overflow-hidden opacity-0 h-0 hidden">
+                            <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl relative">
+                                
+                                <!-- Loading State -->
+                                <div id="ai-loading" class="flex flex-col items-center justify-center py-8 hidden">
+                                    <div class="flex space-x-2 mb-4">
+                                        <div class="w-3 h-3 bg-teal-500 rounded-full animate-bounce"></div>
+                                        <div class="w-3 h-3 bg-teal-500 rounded-full animate-bounce animation-delay-200"></div>
+                                        <div class="w-3 h-3 bg-teal-500 rounded-full animate-bounce animation-delay-400"></div>
+                                    </div>
+                                    <p class="text-slate-500 font-medium">Analyzing patterns and finding the right CBT tool...</p>
+                                </div>
+                                
+                                <!-- Result State -->
+                                <div id="ai-result" class="animate-fade-in-up hidden">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="bg-teal-100 p-3 rounded-full flex-shrink-0">
+                                            <i data-lucide="brain" class="w-6 h-6 text-teal-700"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-400 uppercase mb-1">CBT Guide Suggestion</h4>
+                                            <p id="ai-response-text" class="text-slate-800 text-lg leading-relaxed"></p>
+                                            
+                                            <div class="mt-6 flex gap-3">
+                                                <button onclick="sendToJournal()" class="px-4 py-2 bg-white border border-teal-200 text-teal-700 rounded-lg text-sm font-medium hover:bg-teal-50 transition shadow-sm">
+                                                    Send to Journal
+                                                </button>
+                                                <button onclick="document.getElementById('custom-mood-input').focus()" class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition shadow-sm">
+                                                    Try Another Technique
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Journal View -->
+            <div id="view-journal" class="view-section hidden max-w-5xl mx-auto px-4 py-12 animate-fade-in relative w-full">
+                
+                <!-- Toast Notification -->
+                <div id="journal-toast" class="fixed top-24 right-4 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl transition-all duration-300 transform flex items-center -translate-y-4 opacity-0 pointer-events-none z-50">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-green-400 mr-2"></i>
+                    Entry saved securely.
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Editor Area -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                                <i data-lucide="book-open" class="w-6 h-6 mr-2 text-teal-600"></i>
+                                Mindful Journal
+                            </h2>
+                            <p class="text-slate-500 mb-6 text-sm">Writing things down reduces cognitive load. Express your thoughts freely here.</p>
+                            
+                            <textarea
+                                id="journal-input"
+                                placeholder="What's on your mind today? Write without filter..."
+                                class="w-full h-64 p-5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all text-slate-700 leading-relaxed"
+                            ></textarea>
+                            
+                            <div class="flex justify-between items-center mt-4">
+                                <span id="journal-char-count" class="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                    0 characters
+                                </span>
+                                <button 
+                                    id="journal-save-btn"
+                                    disabled
+                                    class="bg-slate-900 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-medium transition-colors flex items-center shadow-md"
+                                >
+                                    <i data-lucide="feather" class="w-4 h-4 mr-2"></i>
+                                    Save Entry
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full max-h-[600px] overflow-y-auto custom-scrollbar">
+                            <h3 class="text-lg font-bold text-slate-800 mb-6 sticky top-0 bg-white pb-2 border-b border-slate-100">Recent Entries</h3>
+                            <div id="journal-entries-container" class="space-y-4">
+                                <!-- Entries injected by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Spiritual / Mindfulness View -->
+            <div id="view-spiritual" class="view-section hidden max-w-4xl mx-auto px-4 py-12 animate-fade-in text-center w-full">
+                <!-- Header & Toggle -->
+                <div class="mb-12 flex flex-col items-center">
+                    <i data-lucide="sparkles" class="w-12 h-12 text-purple-500 mb-4"></i>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4">Mindfulness & Spirit</h2>
+                    <p class="text-slate-600 max-w-xl mx-auto mb-8">
+                        Integrate holistic well-being. Engage in grounded breathing exercises or receive optional spiritual affirmations to center your soul.
+                    </p>
+
+                    <label class="flex items-center cursor-pointer bg-white px-5 py-3 rounded-full shadow-sm border border-slate-200 hover:bg-slate-50 transition">
+                        <div class="relative">
+                            <input type="checkbox" id="spiritual-toggle" class="sr-only" checked />
+                            <div id="spiritual-toggle-bg" class="block w-14 h-8 rounded-full transition-colors bg-purple-500"></div>
+                            <div id="spiritual-toggle-dot" class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform transform translate-x-6"></div>
+                        </div>
+                        <div class="ml-3 text-slate-700 font-medium">
+                            Daily Spiritual Affirmations
+                        </div>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Breathing Exercise Graphic -->
+                    <div class="bg-slate-900 rounded-3xl p-10 flex flex-col items-center justify-center min-h-[400px] relative overflow-hidden shadow-2xl">
+                        <h3 class="text-white text-xl font-bold mb-8 z-10">4-4-4 Box Breathing</h3>
+                        
+                        <!-- Animated Circle -->
+                        <div class="relative w-48 h-48 flex items-center justify-center mb-8 z-10">
+                            <div id="breath-circle" class="absolute w-full h-full rounded-full border-4 border-teal-500/30 transition-all duration-[4000ms] ease-in-out scale-100"></div>
+                            
+                            <div class="absolute w-32 h-32 bg-slate-800 rounded-full flex items-center justify-center z-20 shadow-inner">
+                                <span id="breath-phase-text" class="text-2xl font-medium text-teal-300 transition-opacity opacity-0">Inhale</span>
+                                <span id="breath-ready-text" class="text-slate-400 absolute transition-opacity opacity-100">Ready?</span>
+                            </div>
+                        </div>
+
+                        <button 
+                            id="breath-btn"
+                            class="z-10 bg-teal-500 hover:bg-teal-400 text-slate-900 px-8 py-3 rounded-full font-bold transition-colors shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                        >
+                            Begin Breathing
+                        </button>
+                    </div>
+
+                    <!-- Affirmation Card -->
+                    <div id="affirmation-card" class="bg-gradient-to-br from-purple-100 to-indigo-50 rounded-3xl p-10 border border-purple-200 flex flex-col justify-center relative transition-all duration-500 opacity-100 scale-100">
+                        <div class="absolute top-6 left-6 text-purple-300">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L16.426 14.739C16.921 13.447 17.172 12.392 17.172 11.573C17.172 10.428 16.786 9.497 16.012 8.781C15.239 8.064 14.28 7.706 13.136 7.706C12.164 7.706 11.365 7.962 10.738 8.473L11.597 10.187C12.012 9.873 12.518 9.716 13.115 9.716C13.629 9.716 14.047 9.895 14.368 10.254C14.689 10.613 14.85 11.082 14.85 11.662C14.85 12.33 14.593 13.344 14.079 14.704L11.597 21H14.017ZM21.364 21L23.773 14.739C24.268 13.447 24.519 12.392 24.519 11.573C24.519 10.428 24.133 9.497 23.359 8.781C22.586 8.064 21.627 7.706 20.483 7.706C19.511 7.706 18.712 7.962 18.085 8.473L18.944 10.187C19.359 9.873 19.865 9.716 20.462 9.716C20.976 9.716 21.394 9.895 21.715 10.254C22.036 10.613 22.197 11.082 22.197 11.662C22.197 12.33 21.94 13.344 21.426 14.704L18.944 21H21.364Z"/></svg>
+                        </div>
+                        <div class="z-10 mt-4">
+                            <h4 class="text-purple-800 font-bold uppercase tracking-widest text-sm mb-6">Today's Focus</h4>
+                            <p class="text-2xl font-medium text-slate-800 leading-snug mb-8 italic">
+                                "You are not the storm; you are the sky. The clouds of anxiety will pass, but your essence remains untouched and infinite."
+                            </p>
+                            <p class="text-slate-500 text-sm">
+                                Reflect on this truth when you feel overwhelmed today. You are greater than temporary feelings.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center space-x-2 mb-4">
+                    <i data-lucide="brain" class="h-6 w-6 text-teal-500"></i>
+                    <span class="text-xl font-bold text-white">Mind Gym</span>
+                </div>
+                <p class="text-sm text-slate-400 mb-4 max-w-sm">
+                    An AI-driven mental wellness platform providing personalized therapy prompts and journaling to help manage stress. Empowering youth, women, and professionals globally.
+                </p>
+            </div>
+            <div>
+                <h3 class="text-white font-semibold mb-4">Platform</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><button onclick="navigateTo('therapy')" class="hover:text-teal-400 transition">AI Therapy</button></li>
+                    <li><button onclick="navigateTo('journal')" class="hover:text-teal-400 transition">Smart Journal</button></li>
+                    <li><button onclick="navigateTo('spiritual')" class="hover:text-teal-400 transition">Mindfulness</button></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white font-semibold mb-4">Legal</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="hover:text-teal-400 transition">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-teal-400 transition">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-teal-400 transition">Crisis Support</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-slate-800 text-sm text-center text-slate-500" id="copyright">
+            <!-- Set via JS -->
+        </div>
+    </footer>
+
+    <!-- Interactive Logic -->
+    <script>
+        // 1. Initialize Icons and basic UI elements
+        lucide.createIcons();
+        document.getElementById('copyright').innerHTML = `&copy; ${new Date().getFullYear()} Mind Gym Wellness. Not a replacement for emergency medical care.`;
+
+        // 2. Navigation Logic
+        const views = ['home', 'therapy', 'journal', 'spiritual'];
+        let isMobileMenuOpen = false;
+
+        function navigateTo(targetView) {
+            // Hide all views, show target
+            views.forEach(view => {
+                document.getElementById(`view-${view}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${targetView}`).classList.remove('hidden');
+
+            // Update Desktop Nav Styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === targetView) {
+                    btn.classList.add('nav-active');
+                    btn.classList.remove('nav-inactive');
+                } else {
+                    btn.classList.remove('nav-active');
+                    btn.classList.add('nav-inactive');
+                }
+            });
+
+            // Update Mobile Nav Styling
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                if(btn.dataset.target === targetView) {
+                    btn.classList.add('mobile-nav-active');
+                    btn.classList.remove('mobile-nav-inactive');
+                } else {
+                    btn.classList.remove('mobile-nav-active');
+                    btn.classList.add('mobile-nav-inactive');
+                }
+            });
+
+            // Close Mobile Menu if open
+            if(isMobileMenuOpen) {
+                toggleMobileMenu();
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mobile Menu Toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconMenu = document.getElementById('icon-menu');
+        const iconClose = document.getElementById('icon-close');
+
+        function toggleMobileMenu() {
+            isMobileMenuOpen = !isMobileMenuOpen;
+            if(isMobileMenuOpen) {
+                mobileMenu.classList.remove('hidden');
+                iconMenu.classList.add('hidden');
+                iconClose.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+                iconMenu.classList.remove('hidden');
+                iconClose.classList.add('hidden');
+            }
+        }
+        mobileBtn.addEventListener('click', toggleMobileMenu);
+
+        // 3. Therapy View Logic
+        const moods = [
+            { label: 'Anxious', icon: '😰', color: 'bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200 focus:ring-orange-500' },
+            { label: 'Overwhelmed', icon: '😵‍💫', color: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200 focus:ring-red-500' },
+            { label: 'Sad', icon: '😔', color: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 focus:ring-blue-500' },
+            { label: 'Stuck', icon: '🧱', color: 'bg-slate-200 text-slate-700 border-slate-300 hover:bg-slate-300 focus:ring-slate-500' },
+            { label: 'Unmotivated', icon: '🥱', color: 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200 focus:ring-purple-500' },
+        ];
+
+        const cbtResponses = {
+            'Anxious': "It sounds like you're dealing with a lot of future-oriented worry. Let's try 'Cognitive Restructuring'. What is the absolute worst that could happen? Now, what is the most *realistic* outcome?",
+            'Overwhelmed': "When everything feels like too much, we need to break it down. Let's use the 'Chunking' technique. Write down the top 3 things on your mind, and let's put the rest in a mental box for tomorrow.",
+            'Sad': "I hear you. Sadness can feel heavy. A useful CBT tool here is 'Behavioral Activation'. Can you commit to doing just one tiny, 5-minute task that used to bring you joy, even if you don't feel like it right now?",
+            'Stuck': "Feeling stuck often comes from black-and-white thinking. Are you telling yourself 'I can't do anything right'? Let's find the gray area. Name one small thing you *did* manage to do today.",
+            'Unmotivated': "Motivation often follows action, not the other way around. Let's try the '5-Minute Rule'. Tell yourself you will work on your task for just 5 minutes. If you want to stop after 5 minutes, you can. Are you willing to try?"
+        };
+
+        const moodContainer = document.getElementById('mood-buttons-container');
+        let selectedMoodBtn = null;
+
+        // Render Mood Buttons
+        moods.forEach(mood => {
+            const btn = document.createElement('button');
+            btn.className = `flex items-center space-x-2 px-5 py-3 rounded-full border transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 ${mood.color}`;
+            btn.innerHTML = `<span class="text-xl">${mood.icon}</span><span class="font-medium">${mood.label}</span>`;
+            btn.onclick = () => handleMoodSelect(mood.label, btn);
+            moodContainer.appendChild(btn);
+        });
+
+        const customInput = document.getElementById('custom-mood-input');
+        const customSubmitBtn = document.getElementById('custom-mood-submit');
+        const aiResponseContainer = document.getElementById('ai-response-container');
+        const aiLoading = document.getElementById('ai-loading');
+        const aiResult = document.getElementById('ai-result');
+        const aiResponseText = document.getElementById('ai-response-text');
+
+        customInput.addEventListener('input', (e) => {
+            customSubmitBtn.disabled = !e.target.value.trim();
+        });
+
+        function clearMoodSelection() {
+            if(selectedMoodBtn) {
+                selectedMoodBtn.classList.remove('ring-2', 'ring-offset-2', 'shadow-md');
+                selectedMoodBtn = null;
+            }
+        }
+
+        function triggerAIAnalysis(responseStr) {
+            // Show container & loading
+            aiResponseContainer.classList.remove('hidden');
+            setTimeout(() => {
+                aiResponseContainer.classList.remove('opacity-0', 'h-0');
+                aiResponseContainer.classList.add('opacity-100', 'h-auto');
+            }, 10);
+            
+            aiLoading.classList.remove('hidden');
+            aiResult.classList.add('hidden');
+
+            // Simulate Network Request
+            setTimeout(() => {
+                aiLoading.classList.add('hidden');
+                aiResponseText.textContent = responseStr;
+                aiResult.classList.remove('hidden');
+            }, 1500);
+        }
+
+        function handleMoodSelect(label, btnRef) {
+            clearMoodSelection();
+            selectedMoodBtn = btnRef;
+            selectedMoodBtn.classList.add('ring-2', 'ring-offset-2', 'shadow-md');
+            customInput.value = '';
+            customSubmitBtn.disabled = true;
+            
+            triggerAIAnalysis(cbtResponses[label]);
+        }
+
+        document.getElementById('custom-mood-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = customInput.value.trim();
+            if(!text) return;
+            
+            clearMoodSelection();
+            const responseStr = `You mentioned: "${text}". It sounds like you're experiencing some cognitive distortion. A good CBT technique here is the "Double Standard Method". Would you say the same critical things to a friend in your situation? Be as kind to yourself as you would be to a loved one.`;
+            triggerAIAnalysis(responseStr);
+        });
+
+        function sendToJournal() {
+            const aiText = document.getElementById('ai-response-text').textContent;
+            document.getElementById('journal-input').value = `Reflecting on CBT advice: "${aiText}"\n\nMy thoughts: `;
+            navigateTo('journal');
+            updateJournalCharCount();
+            document.getElementById('journal-input').focus();
+        }
+
+        // 4. Journal Logic
+        let journalEntries = [
+            { id: 1, date: 'Oct 24, 2023', time: '09:41 AM', text: 'Tried the cognitive restructuring exercise today. It helped me realize my presentation wasn\'t a total disaster, just had a few bumps.' },
+            { id: 2, date: 'Oct 22, 2023', time: '08:15 PM', text: 'Feeling overwhelmed with exams. Need to remember the chunking method tomorrow.' }
+        ];
+
+        const journalInput = document.getElementById('journal-input');
+        const journalCharCount = document.getElementById('journal-char-count');
+        const journalSaveBtn = document.getElementById('journal-save-btn');
+        const journalEntriesContainer = document.getElementById('journal-entries-container');
+        const journalToast = document.getElementById('journal-toast');
+
+        function updateJournalCharCount() {
+            const len = journalInput.value.length;
+            journalCharCount.textContent = `${len} characters`;
+            journalSaveBtn.disabled = len === 0;
+        }
+        journalInput.addEventListener('input', updateJournalCharCount);
+
+        function renderJournalEntries() {
+            if(journalEntries.length === 0) {
+                journalEntriesContainer.innerHTML = '<p class="text-slate-400 text-sm italic text-center py-8">Your journal is empty. Start writing to see history.</p>';
+                return;
+            }
+
+            journalEntriesContainer.innerHTML = journalEntries.map(e => `
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-teal-200 hover:shadow-sm transition-all group cursor-pointer">
+                    <div class="flex items-center text-xs text-slate-400 mb-2 font-medium">
+                        <i data-lucide="calendar" class="w-3 h-3 mr-1"></i> ${e.date} • ${e.time}
+                    </div>
+                    <p class="text-sm text-slate-700 line-clamp-3 leading-relaxed">${e.text}</p>
+                </div>
+            `).join('');
+            
+            // Re-render icons for dynamic HTML
+            lucide.createIcons();
+        }
+
+        journalSaveBtn.addEventListener('click', () => {
+            const text = journalInput.value.trim();
+            if(!text) return;
+
+            const now = new Date();
+            journalEntries.unshift({
+                id: Date.now(),
+                date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                text: text
+            });
+
+            journalInput.value = '';
+            updateJournalCharCount();
+            renderJournalEntries();
+
+            // Show Toast
+            journalToast.classList.remove('-translate-y-4', 'opacity-0', 'pointer-events-none');
+            journalToast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                journalToast.classList.add('-translate-y-4', 'opacity-0', 'pointer-events-none');
+                journalToast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        });
+
+        // Initial render
+        renderJournalEntries();
+
+        // 5. Spiritual View Logic
+        let isBreathing = false;
+        let breathPhase = 'Inhale';
+        let breathInterval = null;
+        let spiritualEnabled = true;
+
+        const spiritualToggle = document.getElementById('spiritual-toggle');
+        const spiritualToggleBg = document.getElementById('spiritual-toggle-bg');
+        const spiritualToggleDot = document.getElementById('spiritual-toggle-dot');
+        const affirmationCard = document.getElementById('affirmation-card');
+        
+        spiritualToggle.addEventListener('change', (e) => {
+            spiritualEnabled = e.target.checked;
+            
+            if(spiritualEnabled) {
+                spiritualToggleBg.classList.replace('bg-slate-300', 'bg-purple-500');
+                spiritualToggleDot.classList.add('translate-x-6');
+                affirmationCard.classList.remove('opacity-50', 'grayscale', 'scale-95', 'pointer-events-none');
+                affirmationCard.classList.add('opacity-100', 'scale-100');
+            } else {
+                spiritualToggleBg.classList.replace('bg-purple-500', 'bg-slate-300');
+                spiritualToggleDot.classList.remove('translate-x-6');
+                affirmationCard.classList.add('opacity-50', 'grayscale', 'scale-95', 'pointer-events-none');
+                affirmationCard.classList.remove('opacity-100', 'scale-100');
+            }
+        });
+
+        const breathBtn = document.getElementById('breath-btn');
+        const breathCircle = document.getElementById('breath-circle');
+        const breathPhaseText = document.getElementById('breath-phase-text');
+        const breathReadyText = document.getElementById('breath-ready-text');
+
+        function updateBreathingVisuals() {
+            if(!isBreathing) {
+                breathCircle.className = "absolute w-full h-full rounded-full border-4 border-teal-500/30 transition-all duration-[4000ms] ease-in-out scale-100";
+                breathPhaseText.classList.replace('opacity-100', 'opacity-0');
+                breathReadyText.classList.replace('opacity-0', 'opacity-100');
+                return;
+            }
+
+            breathPhaseText.classList.replace('opacity-0', 'opacity-100');
+            breathReadyText.classList.replace('opacity-100', 'opacity-0');
+            breathPhaseText.textContent = breathPhase;
+
+            let extraClasses = '';
+            if(breathPhase === 'Inhale') extraClasses = 'scale-150 bg-teal-500/20';
+            else if(breathPhase === 'Hold') extraClasses = 'scale-150 bg-teal-500/40';
+            else if(breathPhase === 'Exhale') extraClasses = 'scale-100 bg-transparent';
+
+            breathCircle.className = `absolute w-full h-full rounded-full border-4 border-teal-500/30 transition-all duration-[4000ms] ease-in-out ${extraClasses}`;
+        }
+
+        breathBtn.addEventListener('click', () => {
+            isBreathing = !isBreathing;
+            
+            if(isBreathing) {
+                breathBtn.textContent = 'Stop Exercise';
+                breathPhase = 'Inhale';
+                updateBreathingVisuals();
+                
+                breathInterval = setInterval(() => {
+                    if (breathPhase === 'Inhale') breathPhase = 'Hold';
+                    else if (breathPhase === 'Hold') breathPhase = 'Exhale';
+                    else breathPhase = 'Inhale';
+                    updateBreathingVisuals();
+                }, 4000);
+            } else {
+                breathBtn.textContent = 'Begin Breathing';
+                clearInterval(breathInterval);
+                updateBreathingVisuals();
+            }
+        });
+
+    </script>
+</body>
+</html>
